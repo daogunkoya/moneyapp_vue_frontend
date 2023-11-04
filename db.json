@@ -1,0 +1,8 @@
+{
+  "calculatorData": {
+    "amountFrom": 100,
+    "amountTo": 5200,
+    "commission": 10,
+    "totalAmount": 10200
+  }
+}
