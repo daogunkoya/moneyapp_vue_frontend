@@ -24,14 +24,15 @@
 import HowItWork from "@/components/Dashboard/HowItWork.vue";
 import SenderList from "@/components/Senders/SenderList.vue";
 import TransactionList from "@/components/Transactions/TransactionList.vue";
-import { getAuthorizationHeader } from "@/utils/authService.ts"
 import Spinner from '@/components/Spinner.vue';
 import DashBoardChart from "@/components/Dashboard/DashBoardChart.vue";
-
+import {useHomeStore} from "@/stores/homeStore";
 import { ref, onMounted , watch} from 'vue';
-import axios from 'axios';
-import { ApiUrl } from "@/utils/config";
 
+
+
+
+const homeStore = useHomeStore();
 const senders = ref([]);
 const transactions = ref([]);
 const chartData = ref({});
@@ -48,23 +49,27 @@ const loadSendersTransaction = async (pageNumber: Number, type = null) => {
 
   try {
 
-    const config = getAuthorizationHeader()
-    const response = await axios.get(
-        `${ApiUrl}?page=${pageNumber}&type=${type}`,
-        config
-    );
+    const response = await homeStore.fetchHomeContent(pageNumber, type);
+    const homeContent =  homeStore.senderTransactionData;
 
-    const responseData = response.data;
+    if (homeContent) {
+      const { senders: sendersData, transactions: transData, chartData:ChartInfo } = homeContent;
 
+      if (!type || type === 'senders') {
+        senders.value = sendersData;
+      }
+
+      if (!type || type === 'transactions') {
+        transactions.value = transData;
+      }
+      chartData.value = ChartInfo
+    }
 
     transactionsDataLoaded.value = true
     sendersDataLoaded.value = true
 
-
-    apiData.value = responseData
-
   } catch (error) {
-    console.error('Error loading senders', error);
+    console.error('Error loading ', error);
   }
 };
 
@@ -72,22 +77,22 @@ onMounted(() => {
   loadSendersTransaction(1, null);
 });
 
-watch([sendersDataLoaded,transactionsDataLoaded], () => {
-  // Check if both senders and transactions have data
-
-  if (apiData.value) {
-    const { senders: sendersData, transactions: transData } = apiData.value;
-
-    if (!requestType.value || requestType.value === 'senders') {
-      senders.value = sendersData;
-    }
-
-    if (!requestType.value || requestType.value === 'transactions') {
-      transactions.value = transData;
-
-      chartData.value = transData.chart_data
-    }
-  }
-});
+// watch([sendersDataLoaded,transactionsDataLoaded], () => {
+//   // Check if both senders and transactions have data
+//
+//   if (apiData.value) {
+//     const { senders: sendersData, transactions: transData } = apiData.value;
+//
+//     if (!requestType.value || requestType.value === 'senders') {
+//       senders.value = sendersData;
+//     }
+//
+//     if (!requestType.value || requestType.value === 'transactions') {
+//       transactions.value = transData;
+//
+//       chartData.value = transData.chart_data
+//     }
+//   }
+// });
 
 </script>

@@ -14,7 +14,7 @@ import { ref } from 'vue';
 
 
 const { show } = defineProps(['show']);
-console.log(show)
+//console.log(show)
 
 //const { emit } = defineEmits(['close']);
 

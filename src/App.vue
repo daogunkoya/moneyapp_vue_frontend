@@ -12,7 +12,7 @@ import Sidebar from './components/SideBar/Sidebar.vue'
 
     <div class="flex"> <!-- Adjusted class: flex-1 -->
       <!-- Left Sidebar -->
-      <div class="w-1/5 bg-gray-200">
+      <div class="">
         <Sidebar />
       </div>
 

@@ -1,10 +1,11 @@
 <template>
   <div>
 <!--    when child Modal emit @close, it effectively make showReceiverUpdate  to false and also emit  an event called 'close' to the parent component -->
-    <Modal @close="showReceiverUpdate=false ; $emit('close')" :show="showReceiverUpdate">
+    <Modal @close="closeAction"
+           :show="store.showUpdateReceiverModal">
       <h1 class="place-self-center text-center p-2 my-4 bg-blue-300  w-1/3 rounded">
-        Update  <span class="text-white">{{receiver.receiver_name}} </span></h1>
-      <ReceiverInput :apiCall = "updateSender" :receiver = "receiver " @apiRequestedCompleted = "showReceiverUpdate=false" :banksIdentityList="banksIdentityList"  />
+        Update  <span class="text-white">{{store.activeReceiver.receiverName}} </span></h1>
+      <ReceiverInput :apiCall = "updateReceiver" @apiRequestedCompleted = ""  />
     </Modal>
   </div>
 </template>
@@ -16,35 +17,35 @@ import axios from "axios";
 import {ApiUrl} from "@/utils/config";
 import { getAuthorizationHeader } from "@/utils/authService.ts";
 import ReceiverInput  from "@/components/Receivers/ReceiverInput.vue";
+import {useReceiverrStore} from "@/stores/receiverStore";
+import {defineEmits} from "vue/dist/vue";
 
 
+const store = useReceiverrStore()
+const receiver = ref(store.activeReceiver);
+const receiverName = ref(receiver.receiverName);
+const {displayFor} = defineProps(['displayFor']);
 
-const {displayFor, receiver, showReceiverUpdate, banksIdentityList} = defineProps(['displayFor', 'receiver', 'showReceiverUpdate', 'banksIdentityList']);
-const show = ref(showReceiverUpdate);
+const emit = defineEmits<{
+  (e: 'close'): void
+}>()
 
 
-
-
-const updateSender = async (receiverData:{})=>{
+const updateReceiver = async (receiverData:{})=>{
   console.log('update clicked')
-const senderId  = "";
   try {
-    // Make the POST request using Axios
-    const config = getAuthorizationHeader()
-    const response = await axios.put(`${ApiUrl}sender/${senderid}/${senderData.senderId}`, receiverData, config);
-
-    if (response.status === 200) {
-      const data = response.data;
-      return true
-
-    } else {
-      console.error('Something went wrong');
-      return false; // Indicate a failed login
-    }
+    await store.updateReceivers(receiverData)
   } catch (error) {
     console.error('An error occurred', error);
     return false; // Indicate a failed login
   }
+
+}
+
+const closeAction = ()=>{
+  store.toggleUpdateReceiverModal();
+  emit('close');
+  store.setActiveReceiver({})
 }
 
 

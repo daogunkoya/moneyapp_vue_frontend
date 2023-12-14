@@ -5,6 +5,7 @@ import MainView from "../views/Dashboard.vue";
 import LoginView  from "@/views/WelcomePageView.vue";
 import SenderView from  "@/views/SenderView.vue"
 import ReceiverView from "@/views/ReceiverView.vue";
+import TransactionView from "@/views/TransactionView.vue";
 import { useAuthStore } from '@/stores/piniaStore'; // Import your Pinia store for authentication
 
 //const authStore = useAuthStore(); // Initialize your auth store
@@ -34,6 +35,11 @@ const router = createRouter({
       path: '/senders/:senderId/receivers',
       name: 'receivers',
       component: ReceiverView
+    },
+    {
+      path: '/transactions',
+      name: 'transactions',
+      component: TransactionView
     },
     {
       path: '/about',

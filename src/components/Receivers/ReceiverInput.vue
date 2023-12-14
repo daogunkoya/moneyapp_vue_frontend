@@ -3,15 +3,15 @@
     <select v-model="newReceiverTitle" class="border border-1 min-w-0 w-full p-2" required>
       <option v-for="(title,index) in titles" :key="index" :value="title">{{ title }}</option>
     </select>
-    <input class="border border-1 focus:outline-none min-w-0 w-full p-2" type="text" v-model="receiverFirstName"
+    <input class="border border-1 focus:outline-none min-w-0 w-full p-2" type="text" v-model="newReceiverFirstName"
            placeholder="First Name"
            required/>
-    <input class="border border-1 focus:outline-none min-w-0 w-full p-2" type="text" v-model="receiverLastName"
+    <input class="border border-1 focus:outline-none min-w-0 w-full p-2" type="text" v-model="newReceiverLastName"
            placeholder="Last Name"
            required/>
-    <input class="border focus:outline-none border-1 min-w-0 w-full p-2" type="tel" v-model="receiverPhoneNumber"
+    <input class="border focus:outline-none border-1 min-w-0 w-full p-2" type="tel" v-model="newReceiverPhoneNumber"
            placeholder="Phone Number" required/>
-    <input class="border border-1 focus:outline-none min-w-0 w-full p-2" type="text" v-model="receiverAddress"
+    <input class="border border-1 focus:outline-none min-w-0 w-full p-2" type="text" v-model="newReceiverAddress"
            placeholder="Address"
            required/>
 
@@ -19,9 +19,9 @@
     <label class="flex items-center min-w-0 w-full border border-1">
       <span class="w-1/5 text-gray-400">Transfer Type</span>
       <select v-model="newReceiverTransferType" class="border-none focus:outline-none min-w-0 w-full p-2" required>
-        <option v-for="({value: transferTypeValue, key: transferTypeKey}, index) in newReceiverTransferType" :key="index"
-                :value="transferTypeKey">
-          {{ transferTypeValue }}
+        <option v-for="(transferType, index) in transferTypeList" :key="index"
+                :value="transferType">
+          {{ transferType }}
         </option>
       </select>
     </label>
@@ -30,28 +30,29 @@
     <label class="flex items-center min-w-0 w-full border border-1 ">
       <span class="w-1/5 text-gray-400">Bank</span>
       <select v-model="newReceiverBank" class="border-none focus:outline-none min-w-0 w-full p-2" required>
-        <option v-for="({value: transferTypeValue, key: transferTypeKey}, index) in receiverBanks" :key="index"
-                :value="transferTypeKey">
-          {{ transferTypeValue }}
-        </option>
-      </select>
+      <option  v-for="(bank, index) in receiverBanks" :key="index"
+              :value="bank" >
+        {{ bank }}
+      </option>
+    </select>
+
     </label>
 
-    <input class="border border-1 focus:outline-none min-w-0 w-full p-2" type="text" v-model="receiverBank"
+    <input class="border border-1 focus:outline-none min-w-0 w-full p-2" type="text" v-model="newReceiverAccountNumber"
            placeholder="Account Number"
            required/>
 
     <label class="flex items-center min-w-0 w-full border border-1 ">
       <span class="w-1/5 text-gray-400">Identity Type</span>
-      <select v-model="identityType" class="border-none focus:outline-none min-w-0 w-full p-2" required>
-        <option v-for="({value: transferTypeValue, key: transferTypeKey}, index) in transferTypes" :key="index"
-                :value="transferTypeKey">
-          {{ transferTypeValue }}
+      <select v-model="newReceiverIdentityType" class="border-none focus:outline-none min-w-0 w-full p-2" required>
+        <option v-for="(identity, index) in proofOfIds" :key="index"
+                :value="identity">
+          {{ identity }}
         </option>
       </select>
     </label>
 
-    <button class="bg-blue-300 p-3 rounded" type="submit">{{ !receiverId ? "Add Sender" : "Update Sender" }}</button>
+    <button class="bg-blue-300 p-3 rounded" type="submit">{{ !receiverId ? "Add Receiver" : "Update Receiver" }}</button>
   </form>
 
 </template>
@@ -59,32 +60,50 @@
 <script setup lang="ts">
 import {ref, defineProps, defineEmits} from 'vue';
 import swal from "sweetalert";
+import {useReceiverrStore} from "@/stores/receiverStore";
 
-const {receiver, apiCall} = defineProps((['receiver', 'apiCall']));
+const store = useReceiverrStore();
+
+const {apiCall} = defineProps(([ 'apiCall']));
 const emit = defineEmits<{
   (e: 'apiRequestedCompleted'): void
 }>()
 
 const {
-  receiver_title: receiver = "",
-  receiver_fname: receiverFname = "",
-  receiver_lname: receiverLname = "",
-  receiver_phone: receiverPhone = "",
-  receiver_address: receiverAddress = "",
-  transfer_type: transferType = {transferTypeKey: "", transferTypeValue: ""},
-  identity_type: identityType = {identityTypeKey: "", identityTypeValue: ""},
-  bank = {BankKey: "", BankValue: ""},
-  receiver_id: receiverId = ""
-} = receiver
+  receiverTitle = "",
+  receiverFname= "",
+  receiverLname = "",
+  receiverPhone= "",
+  receiverAddress = "",
+  transferType: receiverTransferType = {},
+  identity: receiverIdentityType = {},
+  bank:receiverBank = {},
+  accountNumber:receiverAccountNumber = "",
+  receiverId: receiverId = "",
+  senderId:senderId = ""
+} = store.activeReceiver
+
+const receiver = ref(store.activeReceiver)
+const apiBankList = store.bankList;
+const apiIdList = store.identityTypeList;
+const apiTransferTypeList = store.transferTypeList
+
+
+const receiverBanks = ref(apiBankList.map(bank=>bank.name));
+const proofOfIds = ref(apiIdList.map(id=>id.name));
+const transferTypeList = ref(apiTransferTypeList);
 
 
 const newReceiver = ref(receiver);
+const newReceiverTitle = ref(receiverTitle);
 const newReceiverFirstName = ref(receiverFname);
 const newReceiverLastName = ref(receiverLname);
 const newReceiverPhoneNumber = ref(receiverPhone);
-const newReceiverAddress = ref(receiverAddress);n
-const newReceiverTransferType = ref({});
-const receiverBanks = ref({});
+const newReceiverAddress = ref(receiverAddress);
+const newReceiverAccountNumber = ref(receiverAccountNumber);
+const newReceiverTransferType = ref(receiverTransferType);
+const newReceiverBank = ref(receiverBank.name);
+const newReceiverIdentityType = ref(receiverIdentityType.name);
 
 
 const titles = ['Mr', 'Mrs', 'Miss'];
@@ -93,13 +112,19 @@ const titles = ['Mr', 'Mrs', 'Miss'];
 const makeApiRequest = () => {
   // Perform actions to add a new receiver using all the provided fields
   const receiverData = {
-    receiver_title: newReceiver.value,
-    receiver_fname: receiverFirstName.value,
-    receiver_lname: receiverLastName.value,
-    receiver_phone: receiverPhoneNumber.value,
+    receiver_title: newReceiverTitle.value,
+    receiver_fname: newReceiverFirstName.value,
+    receiver_lname: newReceiverLastName.value,
+    receiver_phone: newReceiverPhoneNumber.value,
     receiver_address: newReceiverAddress.value,
+    transfer_type:newReceiverTransferType.value,
+    identity_type_id:apiIdList.find(identity => identity.name === newReceiverIdentityType.value)?.id || null,
+    bank_id:apiBankList.find(bank => bank.name === newReceiverBank.value)?.id || null,
+    account_number:newReceiverAccountNumber.value,
     receiverId: receiverId,
   };
+
+  console.log('data', receiverData);
 
   if (apiCall(receiverData)) {
     const message = !receiverId ? "New Sender Successfully Added" : "Successfully Updated"
@@ -112,15 +137,15 @@ const makeApiRequest = () => {
 const emptyInput = () => {
 
   newReceiver.value = "";
-  receiverFirstName.value = "";
-  receiverMiddleName.value = "";
-  receiverLastName.value = "";
-  receiverEmail.value = "";
-  receiverDateOfBirth.value = "";
-  receiverPhoneNumber.value = "";
-  receiverMobileNumber.value = "";
-  receiverAddress.value = "";
-  receiverPostcode.value = "";
+  newReceiverTitle.value = "";
+  newReceiverFirstName.value = "";
+  newReceiverLastName.value = "";
+  newReceiverPhoneNumber.value = "";
+  newReceiverAccountNumber.value = "";
+  newReceiverTransferType.value = "";
+  newReceiverBank.value = "";
+  newReceiverAddress.value = "";
+  newReceiverIdentityType.value = "";
 
   return;
 }

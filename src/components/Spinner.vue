@@ -1,13 +1,17 @@
 <!-- Spinner.vue -->
 <template>
-  <div class="spinner"></div>
+  <div class="spinner" :style="{ width: size + 'px', height: size + 'px', borderWidth: borderSize + 'px' }"></div>
 </template>
 
-<script>
-export default {
-  name: 'Spinner'
-};
+<script setup>
+import {ref, defineProps} from 'vue'
+
+const {size:sizeDimension = 40, borderSize:borderDimension = 2} = defineProps(['size', 'borderSize']);
+
+const size = ref(sizeDimension);
+const borderSize = ref(borderDimension);
 </script>
+
 
 <style>
 .spinner {

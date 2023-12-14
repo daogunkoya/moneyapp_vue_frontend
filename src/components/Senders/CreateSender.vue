@@ -1,6 +1,12 @@
 <template>
-  <div>
-    <button v-show = "displayFor !== 'dashboard'" @click="show=true" class="bg-blue-300 p-3 rounded ">Add New Sender</button>
+  <div class="fixed top-0 right-0 mt-16 flex justify-end m-5">
+    <div class="flex justify-end">
+      <button v-show = "displayFor !== 'dashboard'" @click="show=true" class="bg-green-300 p-3 rounded ">
+        <i class="fa fa-plus" aria-hidden="true"></i>
+        <span> Add Sender</span>
+      </button>
+    </div>
+
     <Modal @close="show=false" :show="show">
       <h1 class="place-self-center text-center p-2 my-4 bg-blue-300  w-1/3 rounded"> New Sender </h1>
       <SenderInput :apiCall = "postSend" sender = " "/>

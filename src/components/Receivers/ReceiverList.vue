@@ -1,14 +1,10 @@
 <template>
-  <div class="p-6">
-    <CreateReceiver v-show = "displayFor !== 'dashboard' "  :banksIdentityList = "banksIdentityList" />
+  <div class="p-1">
+    <CreateReceiver v-show = "displayFor !== 'dashboard' " />
     <UpdateReceiver v-show = "displayFor !== 'dashboard' "
-                  :showReceiverUpdate= "showReceiverUpdate"
-                  :receiver = "activeClickedReceiver"
-                    :banksIdentityList = "banksIdentityList"
-                  @close = "showReceiverUpdate=false"
     />
 
-    <h1 class=" w-1/3 m-3 p-3 bg-gray-300">Latest Receivers </h1>
+    <h1 class=" w-1/3 m-3 p-3 bg-gray-300 rounded-lg">Latest Receivers </h1>
 
     <table class="min-w-full table-auto text-center">
       <thead>
@@ -22,14 +18,14 @@
       </thead>
       <tbody>
 
-      <tr v-for="(receiver,index) in receivers" :key="receiver.sender_id">
+      <tr v-for="(receiver,index) in receivers" :key="receiver.senderId">
         <td class="border px-4 py-2">{{ (page - 1) * perPage + index + 1 }}</td>
-        <td class="border px-4 py-2">{{ receiver.created_at }}</td>
-        <td class="border px-4 py-2">{{ textLimit(receiver.receiver_name,15) }} ({{ receiver.receiver_title }} )</td>
-        <td class="border px-4 py-2">{{ receiver.receiver_phone }}</td>
+        <td class="border px-4 py-2">{{ receiver.createdAt }}</td>
+        <td class="border px-4 py-2">{{ textLimit(receiver.receiverName,15) }} ({{ receiver.receiverTitle }} )</td>
+        <td class="border px-4 py-2">{{ receiver.receiverPhone }}</td>
 
         <td class="border px-4 py-2">
-          <router-link :to="`/senders/${receiver.receiver_id}/receivers`">
+          <router-link :to="`/senders/${receiver.receiverId}/receivers`">
             <button class="bg-blue-300 p-3 rounded">
               <i :class="'fas fa-exchange' " class="w-6 text-center"></i>
               (0) Transactions
@@ -38,7 +34,7 @@
         </td>
 
         <td class="border px-4 py-2">
-          <button class="bg-blue-300 p-3 rounded" @click="receiverUpdate(receiver)">
+          <button class="bg-blue-300 p-3 rounded" @click="showReceiverUpdate(receiver)">
             <i :class="'fas fa-pencil' " class="w-6 text-center"></i>
             Edit
           </button>
@@ -69,25 +65,41 @@ import axios from 'axios';
 import {ApiUrl} from "@/utils/config";
 import {textLimit} from "@/utils/shared";
 import {RouterLink} from "vue-router";
-import { useSenderStore } from "@/stores/senderStore";
-// import {useAuthStore} from "@/stores/piniaStore";
+import {useReceiverrStore} from "@/stores/receiverStore";
+import camelize from "camelize";
+import {camelCase} from "lodash";
 
-const {receivers: receiversData = [], fetchData, displayFor} = defineProps(['receivers', 'fetchData', 'displayFor']);
-const {receiver_count, receiver = [], current_page: currentPage = 1, last_page: finalPage, total, per_page: pageSize, banks_id_list:banksIdList} = receiversData;
+
+
+const store = useReceiverrStore();
+const { fetchData, displayFor} = defineProps([ 'fetchData', 'displayFor']);
+
+const {
+  receiver_count, receiver = [],
+  currentPage = 1,
+  lastPage: finalPage,
+  total, perPage: pageSize,
+  banksIdList} = store.receiverList;
+
 const receivers = ref(receiver);
 const show = ref(false)
 const page:Number = ref<Number>(currentPage);
 const perPage = ref(pageSize);
 const lastPage = ref(finalPage);
-const showReceiverUpdate = ref(false);
 const activeClickedReceiver = ref({});
-const banksIdentityList = ref(banksIdList);
 
 
-// const store = useSenderStore();
-const receiverUpdate = (receiver:{})=>{
-  showReceiverUpdate.value = true
+
+
+const showReceiverUpdate = (receiver:{})=>{
+  const  camelCaseReceiver = camelize(receiver);
+
   activeClickedReceiver.value = receiver
+
+  store.setActiveReceiver(camelCaseReceiver)
+  store.setReceiverId(camelCaseReceiver.receiverId)
+
+  store.toggleUpdateReceiverModal()
 }
 const loadReceivers = async (pageNumber) => {
   try {

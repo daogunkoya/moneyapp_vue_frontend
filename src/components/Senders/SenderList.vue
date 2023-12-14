@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6">
+  <div class="p-1">
     <CreateSender v-show = "displayFor !== 'dashboard' " />
     <UpdateSender v-show = "displayFor !== 'dashboard' "
                   :showSenderUpdate= "showSenderUpdate"
@@ -7,7 +7,7 @@
                   @close = "showSenderUpdate=false"
     />
 
-    <h1 class=" w-1/3 m-3 p-3 bg-gray-300">Latest Senders </h1>
+    <h1 class="text-center w-1/5 m-2 p-3 bg-gray-300 rounded-lg">Latest Senders` </h1>
 
     <table class="min-w-full table-auto text-center">
       <thead>
@@ -23,15 +23,15 @@
 
       <tr v-for="(sender,index) in senders" :key="sender.sender_id">
         <td class="border px-4 py-2">{{ (page - 1) * perPage + index + 1 }}</td>
-        <td class="border px-4 py-2">{{ sender.created_at }}</td>
-        <td class="border px-4 py-2">{{ textLimit(sender.sender_name,15) }} ({{ sender.sender_title }} )</td>
-        <td class="border px-4 py-2">{{ sender.sender_phone }}</td>
+        <td class="border px-4 py-2">{{ sender.createdAt }}</td>
+        <td class="border px-4 py-2">{{ textLimit(sender.senderName,15) }} ({{ sender.senderTitle }} )</td>
+        <td class="border px-4 py-2">{{ sender.senderPhone }}</td>
 
           <td class="border px-4 py-2">
-            <router-link :to="`/senders/${sender.sender_id}/receivers`">
+            <router-link :to="`/senders/${sender.senderId}/receivers`">
             <button class="bg-blue-300 p-3 rounded">
               <i :class="'fas fa-users' " class="w-6 text-center"></i>
-              ({{ sender.count_sender_receivers }}) Receivers
+              ({{ sender.countSenderReceivers }}) Receivers
             </button>
             </router-link>
           </td>
@@ -73,7 +73,8 @@ import { useSenderStore } from "@/stores/senderStore";
 import {useAuthStore} from "@/stores/piniaStore";
 
 const {senders: sendersData = [], fetchData, displayFor} = defineProps(['senders', 'fetchData', 'displayFor']);
-const {sender_count, sender = [], current_page: currentPage = 1, last_page: finalPage, total, per_page: pageSize} = sendersData;
+const {sender_count, sender = [], currentPage = 1, lastPage: finalPage, total, perPage: pageSize} = sendersData;
+
 const senders = ref(sender);
 const show = ref(false)
 const page:Number = ref<Number>(currentPage);
@@ -81,7 +82,6 @@ const perPage = ref(pageSize);
 const lastPage = ref(finalPage);
 const showSenderUpdate = ref(false);
 const activeClickedSender = ref({});
-
 
 const store = useSenderStore();
 const senderUpdate = (sender)=>{
